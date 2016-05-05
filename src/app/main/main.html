@@ -1,0 +1,98 @@
+<div class="container">
+
+<h1>Where To Go</h1>
+
+	<div class="row" style="margin:20px;">
+		<span ng-if="main.home.latitude != null && main.home.longitude != null" class="label label-default" style="margin-right:12px">Home is regsterd</span>
+		<input ng-if="main.home.latitude != null && main.home.longitude != null" type="button" value="Update" class="btn btn-primary" style="margin-right:12px" ng-click="main.showHomeForm()">
+		<input ng-if="main.home.latitude != null && main.home.longitude != null" type="button" value="Recalculate" class="btn btn-primary" ng-click="main.recalculate()">
+		<span ng-if="main.home.latitude == null || main.home.longitude == null" class="label label-danger" style="margin-right:12px">Home is not regsterd</span>
+		<input ng-if="main.home.latitude == null || main.home.longitude == null" type="button" value="Register" class="btn btn-primary" ng-click="main.showHomeForm()">
+		<input type="button" value="New Place" class="btn btn-primary pull-right" ng-click="main.showPlaceForm()">
+	</div>
+
+	<table datatable="ng" dt-options="main.dtOptions" dt-column-defs="main.DTColumnDefs" class="table table-striped">
+		<thead><tr>
+			<th>Category</th>
+			<th>Name</th>
+			<th>Distance (km)</th>
+			<th>Duration (min)</th>
+			<th>Memo</th>
+		</tr></thead>
+		<tr ng-repeat="(id, place) in main.placeMap" ng-click="main.showPlaceForm(place.id)">
+			<td>{{ place.category }}</td>
+			<td><a target="_blank" href="{{ place.url }}">{{ place.name }}</a></td>
+			<td>{{ (place.distance / 1000).toFixed(0) }}</td>
+			<td>{{ (place.duration / 60 ).toFixed(0) }}</td>
+			<td>{{ place.memo }}</td>
+		</tr>
+	</table>
+
+	<div style="margin-top:10px;">
+		<ui-gmap-google-map center="main.map.center" zoom="main.map.zoom" idKey="0">
+			<ui-gmap-marker ng-repeat="(id, place) in main.placeMap"
+				coords="{latitude:place.latitude, longitude:place.longitude}"
+				options="{text:place.name}" events="marker.events" idkey="place.id"
+			>
+				<ui-gmap-window show="true">{{ place.name }}</ui-gmap-window>
+			</ui-gmap-marker>
+		</ui-gmap-google-map>
+	</div>
+
+	<script type="text/ng-template" id="homeForm">
+		<div class="modal-body">
+			<div style="margin: 20px;">
+			<form class="form-horizontal" ng-submit="main.registerHome()">
+				<div class="form-group form-inline">
+					<input type="text" placeholder="name" class="form-control" style="width:250px;margin-right:12px;" ng-model="main.homeForm.name">
+					<input type="button" value="Geocode" class="btn" ng-click="main.geocodeHome()">
+				</div>
+				<div class="form-group form-inline">
+					<input type="text" placeholder="latitude" class="form-control" style="width:120px;margin-right:12px;" ng-model="main.homeForm.latitude">
+					<input type="text" placeholder="longitude" class="form-control" style="width:120px;margin-right:12px;" ng-model="main.homeForm.longitude">
+				</div>
+				<div class="form-group">
+					<input type="submit" value="Register" class="btn btn-primary">
+				</div>
+			</form>
+			</div>
+		</div>
+	</script>
+
+	<script type="text/ng-template" id="placeForm">
+		<div class="modal-body">
+			<div style="margin: 20px;">
+			<form class="form-horizontal" ng-submit="main.createOrUpdatePlace()">
+				<div class="form-group form-inline">
+					<input type="text" placeholder="category" class="form-control" style="width:120px;margin-right:12px;" ng-model="main.placeForm.category">
+					<input type="text" placeholder="name" class="form-control" style="width:200px;margin-right:12px;" ng-model="main.placeForm.name">
+					<input type="button" value="Geocode" class="btn" ng-click="main.geocodePlace()">
+				</div>
+				<div class="form-group form-inline">
+					<input type="text" placeholder="latitude" class="form-control" style="width:120px;margin-right:12px;" ng-model="main.placeForm.latitude">
+					<input type="text" placeholder="longitude" class="form-control" style="width:120px;margin-right:12px;" ng-model="main.placeForm.longitude">
+					<input type="button" value="Toggle Map" class="btn" ng-click="main.placeFormMap.toggle()">
+				</div>
+				<div id="mapChooser" class="form-group" ng-style="main.placeFormMap.style" >
+					<ui-gmap-google-map pan="true" center="main.placeFormMap.center" zoom="12" idKey="100" events="{dblclick:main.placeFormMap.setMarker}" control="main.placeFormMap.control" options="{disableDoubleClickZoom:true}">
+						<ui-gmap-marker coords="main.placeFormMap.marker" idkey="2"></ui-gmap-marker>
+					</ui-gmap-google-map>
+				</div>
+				<div class="form-group">
+					<input type="text" placeholder="URL" class="form-control" style="width:450px;" ng-model="main.placeForm.url">
+				</div>
+				<div class="form-group">
+					<textarea placeholder="memo" class="form-control" style="width:450px" ng-model="main.placeForm.memo"></textarea>
+				</div>
+				<div class="form-group">
+					<input type="hidden" value="{{ main.placeForm.id }}">
+					<input ng-if="main.placeForm.id == null" type="submit" value="Add" class="btn btn-primary">
+					<input ng-if="main.placeForm.id != null" type="submit" value="Update" class="btn btn-primary" style="margin-right:12px;">
+					<input ng-if="main.placeForm.id != null" ng-click="main.deletePlace(main.placeForm.id)" type="button" value="Delete" class="btn btn-danger">
+				</div>
+			</form>
+			</div>
+		</div>
+	</script>
+
+</div>
