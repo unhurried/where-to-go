@@ -6,7 +6,7 @@
 		.controller('MainController', MainController);
 
 	/** @ngInject */
-	function MainController($scope, $modal, localStorageService, DTOptionsBuilder, DTColumnDefBuilder) {
+	function MainController($scope, $modal, localStorageService, DTOptionsBuilder, DTColumnDefBuilder, CsvExporter) {
 		var vm = this;
 
 		/* datatables */
@@ -112,6 +112,10 @@
 			});
 		};
 
+		vm.exportPlaceList = function() {
+			CsvExporter.export(vm.placeMap, ['id', 'category', 'name', 'memo']);
+		}
+
 		/* map */
 
 		vm.map = { center: { latitude: vm.home.latitude, longitude: vm.home.longitude }, zoom: 10 };
@@ -131,11 +135,8 @@
 			});
 
 			vm.placeModalInstance.rendered.then(function(){
-				if(vm.placeFormMap.control.getGMap !== void 0) {
-					var gmap = vm.placeFormMap.control.getGMap();
-					google.maps.event.trigger(gmap, "resize");
-				}
-
+				var gmap = vm.placeFormMap.control.getGMap();
+				google.maps.event.trigger(gmap, "resize");
 				vm.placeFormMap.center = { latitude: vm.placeForm.latitude, longitude: vm.placeForm.longitude };
 				vm.placeFormMap.marker = vm.placeForm;
 			});
@@ -163,8 +164,8 @@
 		/* placeFormMap */
 
 		vm.placeFormMap = {};
-		//vm.placeFormMap.center = { latitude: vm.home.latitude, longitude: vm.home.longitude };
-		//vm.placeFormMap.marker = vm.placeForm;
+		vm.placeFormMap.center = { latitude: 0, longitude: 0 };
+		vm.placeFormMap.marker = vm.placeForm;
 		vm.placeFormMap.style = { "display": "block" };
 		vm.placeFormMap.control = {};
 
